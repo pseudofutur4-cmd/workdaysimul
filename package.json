@@ -11,7 +11,7 @@
     "practice:reset": "tsx prisma/seed.ts",
     "test": "node scripts/test.mjs",
     "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "postinstall": "prisma generate"
   },
   "prisma": {
