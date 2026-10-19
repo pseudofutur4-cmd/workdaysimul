@@ -1,0 +1,496 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url = env("DATABASE_URL")
+}
+model Tenant {
+  id String @id
+  name String
+  companies Company[]
+}
+model Company {
+  id String @id
+  name String
+  country String
+  tenantId String
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  orgs Organization[]
+}
+model Location {
+  id String @id
+  name String
+  country String
+  positions Position[]
+}
+model Organization {
+  id String @id
+  name String
+  parentId String?
+  parent Organization? @relation("Tree", fields: [parentId], references: [id])
+  children Organization[] @relation("Tree")
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+  costCenter String
+  managerId String?
+  users User[]
+  positions Position[]
+  prehires PreHire[]
+  employments Employment[]
+  processes Process[]
+  academyCases AcademyCase[]
+}
+model JobFamily {
+  id String @id
+  name String
+  profiles JobProfile[]
+}
+model JobProfile {
+  id String @id @default(cuid())
+  name String
+  familyId String
+  family JobFamily @relation(fields: [familyId], references: [id])
+  effectiveDate String
+  positions Position[]
+  @@unique([name, familyId, effectiveDate])
+}
+model Position {
+  id String @id @default(cuid())
+  title String
+  orgId String
+  org Organization @relation(fields: [orgId], references: [id])
+  profileId String
+  profile JobProfile @relation(fields: [profileId], references: [id])
+  locationId String
+  location Location @relation(fields: [locationId], references: [id])
+  earliestDate String
+  status String @default("Open")
+  employments Employment[]
+  processes Process[]
+  requisitions Requisition[]
+}
+model PreHire {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  orgId String
+  org Organization @relation(fields: [orgId], references: [id])
+  eligible Boolean @default(true)
+  workerId String? @unique
+  worker Worker? @relation(fields: [workerId], references: [id])
+  processes Process[]
+  candidate Candidate?
+}
+model Worker {
+  id String @id @default(cuid())
+  name String
+  workerType String @default("Employee")
+  prehire PreHire?
+  contact Contact?
+  employments Employment[]
+  compensation Compensation[]
+  user User?
+  processes Process[]
+  onboarding OnboardingTask[]
+  enrollments BenefitEnrollment[]
+  balance TimeOffBalance?
+  absences TimeOffRequest[]
+  learning LearningEnrollment[]
+}
+model Contact {
+  workerId String @id
+  worker Worker @relation(fields: [workerId], references: [id])
+  workEmail String
+  personalEmail String
+}
+model Employment {
+  id String @id @default(cuid())
+  workerId String
+  worker Worker @relation(fields: [workerId], references: [id])
+  positionId String
+  position Position @relation(fields: [positionId], references: [id])
+  orgId String
+  org Organization @relation(fields: [orgId], references: [id])
+  title String
+  status String
+  hours Float
+  effectiveDate String
+  recordedAt DateTime @default(now())
+  processId String? @unique
+  @@unique([workerId, effectiveDate])
+  @@index([orgId, effectiveDate])
+}
+model Compensation {
+  id String @id @default(cuid())
+  workerId String
+  worker Worker @relation(fields: [workerId], references: [id])
+  annualAmount Int
+  currency String @default("EUR")
+  effectiveDate String
+  processId String? @unique
+  @@unique([workerId, effectiveDate])
+}
+model User {
+  id String @id
+  name String
+  role String
+  passwordHash String
+  orgId String?
+  org Organization? @relation(fields: [orgId], references: [id])
+  workerId String? @unique
+  worker Worker? @relation(fields: [workerId], references: [id])
+  sessions Session[]
+  initiated Process[] @relation("Initiator")
+  tasks ApprovalTask[]
+  audits AuditEvent[]
+  attempts PracticeAttempt[]
+  academyCases AcademyCase[] @relation("AcademyOwner")
+  academyReviews AcademyCase[] @relation("AcademyReviewer")
+  tutorialProgress TutorialProgress[]
+  implementationProjects ImplementationProject[]
+}
+model Session {
+  token String @id
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+}
+model Policy {
+  id String @id @default(cuid())
+  role String
+  domain String
+  granted Boolean
+  @@unique([role, domain])
+}
+model ProcessDefinition {
+  kind String @id
+  name String
+  version Int @default(1)
+  sourceVersion String @default("2024-08-22")
+  observedAt String @default("2026-10-14")
+  confidence String @default("inferred-routing")
+  simulationNotes String
+  initiatorRoles String
+  approvalRole String
+  finalReview Boolean @default(false)
+  processes Process[]
+}
+model Process {
+  id String @id @default(cuid())
+  kind String
+  definition ProcessDefinition @relation(fields: [kind], references: [kind])
+  version Int
+  initiatorId String
+  initiator User @relation("Initiator", fields: [initiatorId], references: [id])
+  orgId String
+  org Organization @relation(fields: [orgId], references: [id])
+  workerId String?
+  worker Worker? @relation(fields: [workerId], references: [id])
+  prehireId String?
+  prehire PreHire? @relation(fields: [prehireId], references: [id])
+  positionId String?
+  position Position? @relation(fields: [positionId], references: [id])
+  requisitionId String?
+  requisition Requisition? @relation(fields: [requisitionId], references: [id])
+  candidateId String?
+  candidate Candidate? @relation(fields: [candidateId], references: [id])
+  status String
+  effectiveDate String
+  reason String
+  hours Float @default(40)
+  amount Int?
+  endDate String?
+  days Int?
+  comment String @default("")
+  requestKey String @unique
+  createdAt DateTime @default(now())
+  tasks ApprovalTask[]
+  @@index([orgId, status])
+}
+model ApprovalTask {
+  id String @id @default(cuid())
+  processId String
+  process Process @relation(fields: [processId], references: [id])
+  assigneeId String
+  assignee User @relation(fields: [assigneeId], references: [id])
+  step String
+  status String @default("Pending")
+  actedAt DateTime?
+}
+model OnboardingTask {
+  id String @id @default(cuid())
+  workerId String
+  worker Worker @relation(fields: [workerId], references: [id])
+  label String
+  completed Boolean @default(false)
+  @@unique([workerId, label])
+}
+model AuditEvent {
+  id Int @id @default(autoincrement())
+  actorId String
+  actor User @relation(fields: [actorId], references: [id])
+  action String
+  objectId String
+  orgId String?
+  processId String?
+  effectiveDate String?
+  before String
+  after String
+  permission String @default("Allowed")
+  createdAt DateTime @default(now())
+  @@index([objectId])
+}
+model Requisition {
+  id String @id @default(cuid())
+  title String
+  positionId String
+  position Position @relation(fields: [positionId], references: [id])
+  status String @default("Draft")
+  posted Boolean @default(false)
+  candidates Candidate[]
+  processes Process[]
+}
+model Candidate {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  requisitionId String
+  requisition Requisition @relation(fields: [requisitionId], references: [id])
+  stage String @default("Applied")
+  prehireId String? @unique
+  prehire PreHire? @relation(fields: [prehireId], references: [id])
+  processes Process[]
+}
+model BenefitPlan {
+  id String @id
+  name String
+  monthlyCost Int
+  employeeOnly Boolean @default(true)
+  windowStart String
+  windowEnd String
+  enrollments BenefitEnrollment[]
+}
+model BenefitEnrollment {
+  id String @id @default(cuid())
+  workerId String
+  worker Worker @relation(fields: [workerId], references: [id])
+  planId String
+  plan BenefitPlan @relation(fields: [planId], references: [id])
+  effectiveDate String
+  @@unique([workerId, planId])
+}
+model TimeOffBalance {
+  workerId String @id
+  worker Worker @relation(fields: [workerId], references: [id])
+  entitlement Int @default(25)
+  used Int @default(0)
+}
+model TimeOffRequest {
+  id String @id @default(cuid())
+  workerId String
+  worker Worker @relation(fields: [workerId], references: [id])
+  processId String @unique
+  startDate String
+  endDate String
+  days Int
+  canceled Boolean @default(false)
+}
+model LearningCourse {
+  id String @id
+  name String
+  enrollments LearningEnrollment[]
+}
+model LearningEnrollment {
+  id String @id @default(cuid())
+  workerId String
+  worker Worker @relation(fields: [workerId], references: [id])
+  courseId String
+  course LearningCourse @relation(fields: [courseId], references: [id])
+  completed Boolean @default(false)
+  @@unique([workerId, courseId])
+}
+model PracticeAttempt {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  scenario String
+  baselineAudit Int
+  score Int @default(0)
+  startedAt DateTime @default(now())
+}
+
+model AcademyCase {
+  id String @id @default(cuid())
+  module String
+  ownerId String
+  owner User @relation("AcademyOwner", fields: [ownerId], references: [id])
+  reviewerId String?
+  reviewer User? @relation("AcademyReviewer", fields: [reviewerId], references: [id])
+  orgId String
+  org Organization @relation(fields: [orgId], references: [id])
+  status String @default("Draft")
+  version Int @default(1)
+  payload String
+  feedback String @default("")
+  rating Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ledgerLines AcademyLedgerLine[]
+  purchase AcademyPurchase?
+  timeEntry AcademyTimeEntry?
+  goal AcademyGoal?
+  payslip AcademyPayslip?
+  run AcademyRun?
+  accessTest AcademyAccessTest?
+  @@index([module, ownerId])
+  @@index([reviewerId, status])
+}
+model AcademyLedgerLine {
+  id String @id @default(cuid())
+  caseId String
+  case AcademyCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  account String
+  debitCents Int
+  creditCents Int
+  accountingDate String
+}
+model AcademyPurchase {
+  caseId String @id
+  case AcademyCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  item String
+  supplier String
+  quantity Int
+  totalCents Int
+  received Boolean @default(false)
+}
+model AcademyTimeEntry {
+  caseId String @id
+  case AcademyCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  ownerId String
+  workDate String
+  regularMinutes Int
+  overtimeMinutes Int
+  @@unique([ownerId, workDate])
+}
+model AcademyGoal {
+  caseId String @id
+  case AcademyCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  goal String
+  dueDate String
+  measure String
+  progress Int
+  managerRating Int
+  managerFeedback String
+}
+model AcademyPayslip {
+  caseId String @id
+  case AcademyCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  grossCents Int
+  taxCents Int
+  deductionCents Int
+  netCents Int
+}
+model AcademyRun {
+  caseId String @id
+  case AcademyCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  output String
+  log String
+}
+model AcademyAccessTest {
+  caseId String @id
+  case AcademyCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  role String
+  domain String
+  decision String
+  approvalAllowed Boolean @default(false)
+}
+model TutorialProgress {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson String
+  step Int @default(0)
+  completed Boolean @default(false)
+  caseId String?
+  processId String?
+  updatedAt DateTime @updatedAt
+  @@unique([userId, lesson])
+}
+
+model ImplementationProject {
+  id String @id @default(cuid())
+  ownerId String
+  owner User @relation(fields: [ownerId], references: [id])
+  name String
+  config String
+  version Int @default(1)
+  learningMode String @default("Guided")
+  guideStep Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  releases ImplementationRelease[]
+  hires ImplementationHire[]
+  workers ImplementationWorker[]
+  evidence ImplementationEvidence[]
+  @@index([ownerId])
+}
+model ImplementationRelease {
+  id String @id @default(cuid())
+  projectId String
+  project ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage String
+  config String
+  configHash String
+  sourceVersion Int
+  createdAt DateTime @default(now())
+  @@index([projectId, stage])
+}
+model ImplementationHire {
+  id String @id @default(cuid())
+  projectId String
+  project ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestKey String
+  environment String
+  config String
+  configHash String
+  payload String
+  initiator String
+  assignee String?
+  step Int @default(0)
+  status String
+  history String
+  worker ImplementationWorker?
+  createdAt DateTime @default(now())
+  @@unique([projectId, requestKey])
+}
+model ImplementationWorker {
+  id String @id @default(cuid())
+  projectId String
+  project ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  hireId String? @unique
+  hire ImplementationHire? @relation(fields: [hireId], references: [id])
+  externalId String
+  environment String
+  name String
+  orgId String
+  profileId String
+  locationId String
+  positionId String?
+  salary Int
+  effectiveDate String
+  onboarding String
+  source String
+  @@unique([projectId, environment, externalId])
+  @@unique([projectId, environment, positionId])
+}
+model ImplementationEvidence {
+  id String @id @default(cuid())
+  projectId String
+  project ImplementationProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  kind String
+  configHash String
+  result String
+  createdAt DateTime @default(now())
+  @@index([projectId, kind])
+}

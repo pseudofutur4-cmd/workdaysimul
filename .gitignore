@@ -1,0 +1,22 @@
+node_modules/
+.next/
+.env*
+!.env.example
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+private_references/
+# Local confidential PDF heading extraction; never publish this index.
+research/pdf-page-index.jsonl
+# Keep all local research and source-derived documentation out of public pushes.
+research/
+docs/
+scripts/index-private-pdf.py
+*.pdf
+test-results/
+playwright-report/
+*.tsbuildinfo
+
+.next-e2e/
+.next-build/
