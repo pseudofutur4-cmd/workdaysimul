@@ -37,6 +37,12 @@ Implementation Lab has eight chapters, from a client brief to a simulated produc
 
 The [architecture guide](handbook/architecture.md) links these decisions to their source files and tests.
 
+## Install on Windows
+
+Download the x64 setup executable and its SHA-256 checksum from the [Windows release](https://github.com/pseudofutur4-cmd/workdaysimul/releases/tag/v0.1.0). Open **HCM Practice Lab** from the Start menu after setup. The launcher starts a local server and opens your default browser. Node.js and the synthetic dataset come with the installer.
+
+The installer is unsigned. Windows may display a publisher warning. See the [Windows install guide](handbook/windows-install.md) for verification, saved data, and uninstall instructions.
+
 ## Run locally
 
 Use Node.js 24 and pnpm 11.25.0, the development baseline. Google Chrome is required for the configured browser tests. Package installation needs internet access; the running simulator needs no Workday account, API key, or external service.

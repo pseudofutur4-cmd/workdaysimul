@@ -22,3 +22,4 @@ playwright-report/
 .next-e2e/
 .next-build/
 .next-release/
+.next-installer/

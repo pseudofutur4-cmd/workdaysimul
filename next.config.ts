@@ -3,6 +3,7 @@ const config: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   devIndicators: false,
+  ...(process.env.HCM_INSTALLER_BUILD === "1" && { output: "standalone" }),
   async headers() {
     return [
       {

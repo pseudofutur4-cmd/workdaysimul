@@ -32,7 +32,9 @@
     ".next-build/types/**/*.ts",
     ".next-build/dev/types/**/*.ts",
     ".next-release/types/**/*.ts",
-    ".next-release/dev/types/**/*.ts"
+    ".next-release/dev/types/**/*.ts",
+    ".next-installer/types/**/*.ts",
+    ".next-installer/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
