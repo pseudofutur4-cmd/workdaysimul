@@ -334,11 +334,18 @@ describe("Phase 3–4: cross-module effects", () => {
     expect(weekdays("2026-10-17", "2026-10-18")).toBe(0);
   });
   test("E2E-08 absence approval debits bank and cancellation restores it", async () => {
+    const start = new Date(today() + "T12:00:00Z");
+    start.setUTCDate(start.getUTCDate() + ((8 - start.getUTCDay()) % 7 || 7));
+    const day = (offset: number) => {
+      const value = new Date(start);
+      value.setUTCDate(value.getUTCDate() + offset);
+      return value.toISOString().slice(0, 10);
+    };
     const p = await submit(employee, {
       kind: "Time Off",
       workerId: "worker-001",
-      effectiveDate: "2026-11-02",
-      endDate: "2026-11-04",
+      effectiveDate: day(0),
+      endDate: day(2),
       reason: "Annual leave",
       requestKey: crypto.randomUUID(),
     });
@@ -361,8 +368,8 @@ describe("Phase 3–4: cross-module effects", () => {
       submit(employee, {
         kind: "Time Off",
         workerId: "worker-001",
-        effectiveDate: "2026-11-03",
-        endDate: "2026-11-05",
+        effectiveDate: day(1),
+        endDate: day(3),
         reason: "Overlap",
         requestKey: crypto.randomUUID(),
       }),

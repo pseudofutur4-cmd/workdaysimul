@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { currentUser } from "@/lib/auth";
 import { validOrigin } from "@/lib/origin";
+import { requestJson } from "@/lib/request-json";
 import { academyAction, academyWorkspace } from "@/lib/academy-engine";
 import { academyModules } from "@/lib/academy-catalog";
 import { db } from "@/lib/db";
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
   const u = await currentUser();
   if (!u) return NextResponse.json({ error: "Sign in first" }, { status: 401 });
   try {
-    const b = await req.json();
+    const b = await requestJson(req);
     if (b.action !== "progress")
       return NextResponse.json({ result: await academyAction(u, b) });
     await requirePermission(u, "practice.use");

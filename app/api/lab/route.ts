@@ -1,6 +1,7 @@
 import { positionStates } from "@/lib/positions";
 import { rescindHire } from "@/lib/rescind";
 import { validOrigin } from "@/lib/origin";
+import { requestJson } from "@/lib/request-json";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -73,7 +74,7 @@ export async function POST(req: NextRequest) {
   if (!u) return NextResponse.json({ error: "Sign in first" }, { status: 401 });
   let op = "unknown";
   try {
-    const b = await req.json();
+    const b = await requestJson(req);
     op = b.op;
     let result: unknown;
     switch (op) {

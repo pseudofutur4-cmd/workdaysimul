@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { currentUser } from "@/lib/auth";
 import { validOrigin } from "@/lib/origin";
+import { requestJson } from "@/lib/request-json";
 import { LabError } from "@/lib/policy";
 import { audit } from "@/lib/engine";
 import { db } from "@/lib/db";
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
   const u = await currentUser();
   if (!u) return NextResponse.json({ error: "Sign in first" }, { status: 401 });
   try {
-    const body = await req.json();
+    const body = await requestJson(req);
     if (body.action === "create") {
       const b = z
         .object({ action: z.literal("create"), name: z.string() })

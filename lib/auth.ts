@@ -1,20 +1,8 @@
-import {
-  scryptSync,
-  timingSafeEqual,
-  randomBytes,
-  createHash,
-} from "node:crypto";
+import { randomBytes, createHash } from "node:crypto";
+export { passwordHash, verifyPassword } from "./password";
 import { cookies } from "next/headers";
 import { db } from "./db";
 import { today } from "./validators";
-export function passwordHash(password: string) {
-  return scryptSync(password, "hcm-local-synthetic-v1", 64).toString("hex");
-}
-export function verifyPassword(value: string, hash: string) {
-  const b = Buffer.from(hash, "hex"),
-    a = Buffer.from(passwordHash(value), "hex");
-  return a.length === b.length && timingSafeEqual(a, b);
-}
 export async function createSession(userId: string) {
   const token = randomBytes(32).toString("hex");
   await db.session.create({

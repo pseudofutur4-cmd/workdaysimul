@@ -4,6 +4,7 @@ import { requirePermission } from "@/lib/policy";
 import { workspace } from "@/lib/read";
 import { audit } from "@/lib/engine";
 import { db } from "@/lib/db";
+import { csvCell } from "@/lib/csv";
 export async function GET(req: NextRequest) {
   const u = await currentUser();
   if (!u) return new NextResponse("Unauthorized", { status: 401 });
@@ -22,12 +23,6 @@ export async function GET(req: NextRequest) {
         w.name.toLowerCase().includes(q) &&
         (!org || w.employments[0].orgId === org),
     );
-    const esc = (v: unknown) =>
-      '"' +
-      String(v ?? "")
-        .replace(/^[=+@-]/, "'$&")
-        .replaceAll('"', '""') +
-      '"';
     const rows = [
       [
         "Worker ID",
@@ -64,7 +59,7 @@ export async function GET(req: NextRequest) {
       u.orgId ?? undefined,
     );
     return new NextResponse(
-      rows.map((row) => row.map(esc).join(",")).join("\r\n"),
+      rows.map((row) => row.map(csvCell).join(",")).join("\r\n"),
       {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",

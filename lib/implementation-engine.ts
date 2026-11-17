@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { csvCell } from "./csv";
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "./db";
@@ -1167,11 +1168,6 @@ async function assertVacancy(
     throw new LabError(
       "Another pending Hire reserves this worker ID or position.",
     );
-}
-function csvCell(value: unknown) {
-  let s = String(value ?? "");
-  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
-  return '"' + s.replaceAll('"', '""') + '"';
 }
 async function projectedWorkers(
   tx: Tx,
