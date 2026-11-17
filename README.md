@@ -3,7 +3,7 @@
 An independent, locally runnable HCM learning simulator with original application code and synthetic company data. Not affiliated with or endorsed by Workday. This Development Preview does not provide an official tenant, certification or complete product parity.
 
 ## Two learning modes
-
+--> Requires an edit
 **Practice Lab:** use a fictional environment as HR, Manager or Employee. Practice Hire approvals and onboarding, staffing, recruiting, compensation, absence, benefits and learning, with saved data and audit history. The Academy offers eleven guided topics with numbered instructions and highlighted controls.
 
 **Implementation Lab:** build a fictional company from an empty, isolated project. Eight chapters cover discovery, organizations, staffing, security, conditional Hire, worker conversion, reporting and simulated releases. Configuration changes drive a persistent company sandbox. Inspect the architecture map, diagnose faults in three troubleshooting copies, save interview explanations and download a synthetic implementation portfolio.
@@ -46,11 +46,11 @@ To share a local production build on a trusted LAN, run it with your machine's c
 pnpm build
 pnpm exec next start --hostname YOUR_LAN_IP --port 3002
 ```
-
+- Instructions not sufficient, add more for different environemtns 
 Your friend opens `http://YOUR_LAN_IP:3002`. Windows Firewall and your network configuration control access. The demo accounts and shared database are designed for local practice.
 
 ## Implemented boundaries
-
+Too many points, make it consise
 - Original reduced configuration editors and sequential workflows; no official Workday screen or tenant parity claim.
 - Implementation configuration, Hire/worker outcomes, release snapshots, evidence and audit are persisted locally.
 - Reports and local exchanges apply server-side scope, effective-date and field-permission checks.
